@@ -1,0 +1,10 @@
+.vs
+bin
+**/obj
+Config.props
+src/
+LICENSE
+build/
+**/*.csproj
+**/*.sln
+**/NuGet.Config
