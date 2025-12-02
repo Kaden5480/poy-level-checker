@@ -12,6 +12,10 @@ namespace LevelChecker {
         internal static Font gameFont { get; private set; }
         internal static string hash { get; private set; }
 
+        private static string BytesToString(byte[] bytes) {
+            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+        }
+
         private static string GetFullPath(GameObject obj) {
             string path = obj.name;
             Transform parent = obj.transform.parent;
@@ -24,37 +28,24 @@ namespace LevelChecker {
         }
 
         private static byte[] ToBytes(Transform t) {
-            StringBuilder data = new StringBuilder();
+            StringBuilder builder = new StringBuilder();
 
-            string full = GetFullPath(t.gameObject);
-            data.Append(full);
-            data.Append($"{t.gameObject.tag}{t.gameObject.layer}{t.gameObject.activeSelf}");
-            data.Append($"{t.position.x}{t.position.y}{t.position.z}");
-            data.Append($"{t.localScale.x}{t.localScale.y}{t.localScale.z}");
-            data.Append($"{t.rotation.x}{t.rotation.y}{t.rotation.z}{t.rotation.w}");
-
-            for (int i = 0; i < t.childCount; i++) {
-                Transform child = t.GetChild(i);
-                data.Append(child.name);
-            }
-
-            foreach (Component c in t.GetComponents<Component>()) {
-                data.Append($"{c.name}{c.GetType()}");
-            }
+            builder.Append($"{GetFullPath(t.gameObject)}");
+            builder.Append($"{t.gameObject.tag}");
+            builder.Append($"{t.gameObject.layer}");
+            builder.Append($"{t.position}");
+            builder.Append($"{t.localScale}");
+            builder.Append($"{t.rotation}");
 
             E_ForceZone zone = t.gameObject.GetComponent<E_ForceZone>();
             if (zone != null) {
-                data.Append($"{zone.addPushForceOnEnter}{zone.constantPushForce}");
-                data.Append($"{zone.resetVelocity}{zone.force}");
+                builder.Append($"{zone.addPushForceOnEnter}{zone.constantPushForce}");
+                builder.Append($"{zone.resetVelocity}{zone.force}");
             }
 
-            string fullName = data.ToString();
+            string fullName = builder.ToString();
 
-            return Encoding.UTF8.GetBytes(fullName.ToString());
-        }
-
-        private static string BytesToString(byte[] bytes) {
-            return BitConverter.ToString(bytes).Replace("-", "").ToLower();
+            return Encoding.UTF8.GetBytes(fullName);
         }
 
 #region Caching
@@ -72,15 +63,26 @@ namespace LevelChecker {
                 FindFont();
             }
 
-            List<UniqueID> ordered = Resources
+            List<string> orderedNames = new List<string>();
+            List<UniqueID> objects = Resources
                 .FindObjectsOfTypeAll<UniqueID>()
                 .ToList();
 
-            ordered.Sort((a, b) => String.Compare(a.name, b.name));
+            foreach (UniqueID obj in objects) {
+                byte[] bytes = ToBytes(obj.transform);
+
+                using (SHA1 sha1 = SHA1.Create()) {
+                    orderedNames.Add(BytesToString(
+                        sha1.ComputeHash(bytes)
+                    ));
+                }
+            }
+
+            orderedNames.Sort((a, b) => String.Compare(a, b));
 
             using (MemoryStream stream = new MemoryStream()) {
-                foreach (UniqueID obj in ordered) {
-                    byte[] bytes = ToBytes(obj.transform);
+                foreach (string name in orderedNames) {
+                    byte[] bytes = Encoding.UTF8.GetBytes(name);
                     stream.Write(bytes, 0, bytes.Length);
                 }
 
