@@ -1,10 +1,5 @@
 .vs
 bin
 **/obj
+build/*.zip
 Config.props
-src/
-LICENSE
-build/
-**/*.csproj
-**/*.sln
-**/NuGet.Config
