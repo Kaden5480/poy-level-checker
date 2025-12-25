@@ -3,8 +3,8 @@
     <TargetFramework>net472</TargetFramework>
     <Platform>Any CPU</Platform>
     <AssemblyName>LevelChecker</AssemblyName>
-    <Description>A Peaks of Yore mod which validates custom levels</Description>
-    <Version>0.2.0</Version>
+    <Description>A Peaks of Yore mod which validates custom levels.</Description>
+    <Version>0.3.0</Version>
     <RootNamespace>$(AssemblyName)</RootNamespace>
     <Configurations>Debug;Release</Configurations>
     <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
