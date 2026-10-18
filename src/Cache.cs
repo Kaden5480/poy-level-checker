@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -40,12 +41,11 @@ namespace LevelChecker {
             E_ForceZone zone = t.gameObject.GetComponent<E_ForceZone>();
             if (zone != null) {
                 builder.Append($"{zone.addPushForceOnEnter}{zone.constantPushForce}");
-                builder.Append($"{zone.resetVelocity}{zone.force}");
+                builder.Append($"{zone.resetVelocity}");
+                builder.Append(zone.force.ToString("F", CultureInfo.InvariantCulture));
             }
 
-            string fullName = builder.ToString();
-
-            return Encoding.UTF8.GetBytes(fullName);
+            return Encoding.UTF8.GetBytes(builder.ToString());
         }
 
 #region Caching
